@@ -24,14 +24,10 @@ public class AreteVerticale extends Arete {
     }
 
     @Override
-    public double longueur() {
-        return haut - bas ;
-    }
+    public double debut() { return haut ; }
 
     @Override
-    public boolean contient(double y) {
-        return y <= haut && y >= bas ;
-    }
+    public double fin() { return bas ; }
 
     @Override
     public Arete separer(double v) {

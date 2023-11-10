@@ -5,11 +5,19 @@ public abstract class Arete {
 
     }
 
-    public abstract boolean contient(double v) ;
+    public boolean contient(double v) {
+        return v <= fin() && v >= debut() ;
+    };
 
     public abstract double position() ;
 
-    public abstract double longueur() ;
+    public abstract double debut() ;
+
+    public abstract double fin() ;
+
+    public double longueur() {
+        return fin() - debut() ;
+    } ;
 
     public abstract Arete separer(double v) ;
 
