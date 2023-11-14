@@ -3,8 +3,8 @@ package org.example;
 public class AreteHorizontale extends Arete {
 
     private final double hauteur ;
-    private final double posGauche ;
-    private double posDroite ;
+    private final double gauche ;
+    private double droite ;
 
     public AreteHorizontale(double yVal, double gVal, double dVal) {
         hauteur = yVal ;

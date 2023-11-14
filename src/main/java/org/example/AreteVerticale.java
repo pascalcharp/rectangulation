@@ -1,6 +1,8 @@
 package org.example;
 
-public class AreteVerticale extends Arete {
+import java.util.Comparator;
+
+public class AreteVerticale extends Arete implements Comparable<AreteVerticale> {
 
     private final double  xPos;
     private final double  haut ;
@@ -64,5 +66,14 @@ public class AreteVerticale extends Arete {
         if (!(o instanceof AreteVerticale)) return false ;
         AreteVerticale a = (AreteVerticale) o ;
         return xPos == a.xPos && haut == a.haut && bas == a.bas ;
+    }
+
+    @Override
+    public int compareTo(AreteVerticale a) {
+        int comparePosition = Double.compare(a.xPos, this.xPos) ;
+        if (comparePosition != 0) return comparePosition ;
+        int compareDebut = Double.compare(a.debut(), this.debut()) ;
+        if (compareDebut != 0) return compareDebut ;
+        return Double.compare(a.fin(), this.fin());
     }
 }

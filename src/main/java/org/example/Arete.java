@@ -22,4 +22,5 @@ public abstract class Arete {
     public abstract Arete separer(double v) ;
 
     public abstract Arete fusionner(Arete a) ;
+
 }
