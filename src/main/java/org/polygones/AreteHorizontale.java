@@ -54,10 +54,10 @@ public class AreteHorizontale extends Arete implements Comparable<AreteHorizonta
         int comparePosition = Double.compare(a.positionVal, this.positionVal) ;
         if (comparePosition != 0) return comparePosition ;
 
-        int compareDebut = Double.compare(a.debut(), this.debut()) ;
+        int compareDebut = Double.compare(this.debut(), a.debut()) ;
         if (compareDebut != 0) return compareDebut ;
 
-        return Double.compare(a.fin(), this.fin());
+        return Double.compare(this.fin(), a.fin());
     }
 
 }

@@ -7,7 +7,7 @@ import static org.polygones.PolygoneOrthogonalNonConnexe.Type.FIN;
 import static org.polygones.Precision.DoubleEquals;
 
 public class PolygoneOrthogonalNonConnexe {
-    enum Type {DEBUT, FIN, SEPARATION, FUSION} ;
+    enum Type {DEBUT, FIN, SEPARATION, FUSION}
 
     PolygoneOrthogonalSimplementConnexe exterieur ;
     ArrayList<PolygoneOrthogonalSimplementConnexe> trous ;
@@ -19,6 +19,8 @@ public class PolygoneOrthogonalNonConnexe {
 
     ArrayList<PolygoneOrthogonalSimplementConnexe> rectangles = new ArrayList<>() ;
 
+    AreteHorizontale areteU ;
+    AreteHorizontale areteN ;
     int total ;
 
     /**
@@ -133,14 +135,17 @@ public class PolygoneOrthogonalNonConnexe {
     public void decomposerEnRectangles() {
 
         mettreLesAretesHorizontalesEnFile() ;
+        assert Q.size() > 1 ;
         trierLesAretesVerticales() ;
         marquerLesAretes() ;
         marquerLesAretesDebutEtFin() ;
 
+        areteN = null ;
+        areteU = null ;
+        AreteHorizontale courante = Q.poll() ;
+        while (courante != null) {
+            AreteHorizontale prochaine = Q.poll() ;
 
-        AreteHorizontale prochaine = Q.poll() ;
-        do {
-            AreteHorizontale courante = prochaine ;
             switch(types.get(courante)) {
                 case DEBUT:
                     traiterAreteDebut(courante) ;
@@ -149,27 +154,50 @@ public class PolygoneOrthogonalNonConnexe {
                     traiterAreteFin(courante) ;
                     break ;
                 case SEPARATION:
+                    assert prochaine != null ;
+                    traiterAreteSeparation(courante, prochaine) ;
                     break ;
                 case FUSION:
+                    assert prochaine != null ;
+                    traiterAreteFusion(courante, prochaine) ;
                     break ;
                 default:
                     throw new RuntimeException("Type d'arête non-reconnu.") ;
             }
-            prochaine = Q.poll() ;
-        } while (prochaine != null) ;
+            courante = prochaine ;
+        }
     }
 
 
-/*
+
     private AreteHorizontale genererExtensionGauche(AreteHorizontale arete) {
-        // for a in AretesVerticales:
-        //    Trouver a la plus à droite telle arete.croise(a)
+        double distanceMin = Double.MAX_VALUE ;
+        AreteVerticale voisine = null ;
+
+         for (AreteVerticale verticale: verticales) {
+             double distance = arete.debut() - verticale.position() ;
+             if ((distance > 0) && (distance < distanceMin) && (arete.croise(verticale))) {
+                 distanceMin = distance ;
+                 voisine = verticale ;
+             }
+         }
+         return arete.prolongerVers(voisine) ;
+
     }
 
     private AreteHorizontale genererExtensionDroite(AreteHorizontale arete) {
-        // for a in AretesVerticales:
-        //     trouver a la plus à gauche telle que arete.croise(a)
-    }*/
+        double distanceMin = Double.MAX_VALUE ;
+        AreteVerticale voisine = null ;
+
+        for (AreteVerticale verticale: verticales) {
+            double distance = verticale.position() - arete.fin() ;
+            if ((distance > 0) && (distance < distanceMin) && (arete.croise(verticale))) {
+                distanceMin = distance ;
+                voisine = verticale ;
+            }
+        }
+        return arete.prolongerVers(voisine) ;
+    }
 
     private void fermerLaColonne(AreteHorizontale arete) {
         for (AreteHorizontale image: enCours) {
@@ -199,36 +227,38 @@ public class PolygoneOrthogonalNonConnexe {
         fermerLaColonne(arete) ;
     }
 
-/*
-    private void traiterAreteSeparation(AreteHorizontale arete) {
-        // Générer extension gauche  (gauche = genererExtensionGauche(arete) ; )
-        // Générer l'arête fusion gauche-arete et fusionner avec areteFusionN courante
-        // Fusionner arete gauche avec fusionU
-        // Ouvrir une colonne pour fusionU courante
-        // reset fusionU U = null
 
-        // Si prochaine est type ou niveau différent:
-        // Générer extension droite
-        // FusionN <- FusionN - droite  (N = new AreteHorizontal.merge(N, droite) ;
-        // Fermer la colonne correspondant à l'arête de fusionN
-        // Reset areteFusionN
-        // Ouvrir colonne extension droite
+    private void traiterAreteSeparation(AreteHorizontale arete, AreteHorizontale prochaine) {
 
+        AreteHorizontale extensionGauche = genererExtensionGauche(arete) ;
+        areteN = (arete.fusionnerVersLaGaucheAvec(extensionGauche)).fusionnerVersLaGaucheAvec(areteN) ;
+        areteU = extensionGauche.fusionnerVersLaGaucheAvec(areteU) ;
+        ouvrirUneColonne(areteU) ;
+        areteU = null ;
 
+        if ((arete.position() != prochaine.position()) || (types.get(arete) != types.get(prochaine))) {
+            AreteHorizontale extensionDroite = genererExtensionDroite(arete) ;
+            areteN = extensionDroite.fusionnerVersLaGaucheAvec(areteN) ;
+            fermerLaColonne(areteN) ;
+            areteN = null ;
+            ouvrirUneColonne(extensionDroite) ;
+        }
     }
 
-    private void traiterAreteFusion(AreteHorizontale fusion) {
-        // Générer extension gauche
-        // Générer l'arête de fusion areteFusionU-gauche-arete
-        // N <- gauche-N
-        // Fermer la colonne corespondant à N
-        // reset fusionN
+    private void traiterAreteFusion(AreteHorizontale arete, AreteHorizontale prochaine) {
 
-        // Si la prochaine est type ou niveau différent
-        // Générer extension droite
-        // U <- U - droite
-        // Ouvrir une colonne pour l'arête U
-        // Reset U
-        // Fermer la colonne correspondant à l'arête droite
-    }*/
+        AreteHorizontale extensionGauche = genererExtensionGauche(arete) ;
+        areteU = (arete.fusionnerVersLaGaucheAvec(extensionGauche)).fusionnerVersLaGaucheAvec(areteU) ;
+        areteN = extensionGauche.fusionnerVersLaGaucheAvec(areteN) ;
+        fermerLaColonne(areteN) ;
+        areteN = null ;
+
+        if ((arete.position() != prochaine.position()) || (types.get(arete) != types.get(prochaine))) {
+            AreteHorizontale extensionDroite = genererExtensionDroite(arete) ;
+            areteU = extensionDroite.fusionnerVersLaGaucheAvec(areteU) ;
+            ouvrirUneColonne(areteU) ;
+            areteU = null ;
+            fermerLaColonne(extensionDroite) ;
+        }
+    }
 }
