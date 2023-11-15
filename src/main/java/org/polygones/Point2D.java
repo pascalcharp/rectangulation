@@ -1,4 +1,4 @@
-package org.example;
+package org.polygones;
 
 public class Point2D {
     private final double x ;
