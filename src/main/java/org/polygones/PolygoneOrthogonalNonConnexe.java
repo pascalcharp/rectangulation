@@ -169,35 +169,34 @@ public class PolygoneOrthogonalNonConnexe {
     private AreteHorizontale genererExtensionDroite(AreteHorizontale arete) {
         // for a in AretesVerticales:
         //     trouver a la plus à gauche telle que arete.croise(a)
-    }
-
-    private PolygoneOrthogonalSimplementConnexe fermerLaColonne(AreteHorizontale arete) {
-        // Trouver dans la liste des colonnes la colonne telle que ah.superpose(arete) ;
-        // Créer un polygone ah -> arete verticale -> arete -> arete verticale
-        // Transférer ce polygone dans la liste des polygones finis
-        // Retirer ah des colonnes
-    }
-
-    private void ouvrirUneColonne(AreteHorizontale arete) {
-        // Mettre l'arête dans la liste des colonnes  (hashmap repéré par gauche-droite)
     }*/
 
-
-
-    private void traiterAreteDebut(AreteHorizontale arete) {
-        enCours.add(arete) ;
-    }
-
-    private void traiterAreteFin(AreteHorizontale arete) {
+    private void fermerLaColonne(AreteHorizontale arete) {
         for (AreteHorizontale image: enCours) {
             if (DoubleEquals(image.debut(), arete.debut()) && DoubleEquals(image.fin(), arete.fin())) {
                 AreteVerticale v1 = new AreteVerticale(arete.debut(), image.position(), arete.position()) ;
                 AreteVerticale v2 = new AreteVerticale(arete.fin(), image.position(), arete.position()) ;
                 ArrayList<Arete> trace = new ArrayList<>(Arrays.asList(v1, image, v2, arete)) ;
                 rectangles.add(new PolygoneOrthogonalSimplementConnexe(trace)) ;
+                enCours.remove(image) ;
                 break ;
             }
         }
+    }
+
+
+    private void ouvrirUneColonne(AreteHorizontale arete) {
+        enCours.add(arete) ;
+    }
+
+
+
+    private void traiterAreteDebut(AreteHorizontale arete) {
+        ouvrirUneColonne(arete) ;
+    }
+
+    private void traiterAreteFin(AreteHorizontale arete) {
+        fermerLaColonne(arete) ;
     }
 
 /*
